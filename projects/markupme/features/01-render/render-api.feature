@@ -17,7 +17,7 @@ Feature: Render API
     And the response JSON path "format" should equal "html"
     And the response JSON path "title" should equal "Report"
     And the response JSON path "output" should match "<table><thead><tr><th>Feature</th>"
-    And the response JSON path "output" should match "<input type=\"checkbox\" checked disabled>"
+    And the response JSON path "output" should match "<input type=\"checkbox\" checked disabled aria-label=\"Completed task: done\">"
     And the response JSON path "output" should match "<del>old</del>"
     And the response JSON path "stats.tasks.total" should equal "2"
 
