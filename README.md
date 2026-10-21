@@ -11,6 +11,7 @@ SDODS end-to-end tests for [MarkupMe](https://github.com/YarlisAISolutions/marku
 | `02-validate` | `@api` | lint rules with codes and lines, clean documents, stats |
 | `03-playground` | `@ui` | live preview, typing, diagnostics, Mermaid in the browser, accessibility (axe), dark mode |
 | `04-pages` | `@ui` | the kitchen-sink page: TOC, alerts, callouts, copy buttons, diagrams, sanitizing, accessibility, in-page links |
+| `05-site` | `@ui` | the static site from `markupme build`: index, navigation, search, diagrams from local assets, accessibility |
 
 ## Run locally
 
