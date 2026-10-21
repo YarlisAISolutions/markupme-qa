@@ -1,0 +1,13 @@
+# Hierarchy: organization → workspace → project (projects/<slug>) → module (features/<module>).
+organization:
+  slug: yarlis
+  name: Yarlis AI Solutions
+workspaces:
+  - slug: default
+    name: MarkupMe QA
+    organization: yarlis
+defaultWorkspace: default
+defaults:
+  browsers: [chromium]
+  suites: [smoke, regression, sanity]
+  testIdAttribute: data-testid
