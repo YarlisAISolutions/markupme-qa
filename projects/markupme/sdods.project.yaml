@@ -27,6 +27,7 @@ routes:
   kitchen-sink: /kitchen-sink.md
   site-home: /site/index.html
   site-page: /site/kitchen-sink.html
+  studio: /studio/index.html
 
 auth:
   strategy: none
