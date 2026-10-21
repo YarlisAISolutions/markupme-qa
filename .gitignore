@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.sdods/
+test-results/
+html-report/
+shard-reports/
+*.log
+.env
+.env.*
+!.env.example
+projects/*/.auth/
+projects/*/.env.*
+!projects/*/.env.example
+proposals/*/files/
+.DS_Store
