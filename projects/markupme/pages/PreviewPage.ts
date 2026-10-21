@@ -31,6 +31,13 @@ export class PreviewPage extends BasePage {
     await expect(block.locator('svg').first(), 'Mermaid SVG').toBeVisible();
   }
 
+  @Then('searching the site for {string} should list {string}')
+  async siteSearch(query: string, title: string) {
+    await this.page.getByRole('searchbox', { name: 'Search pages' }).fill(query);
+    const results = this.page.getByRole('search').getByRole('link', { name: title, exact: true });
+    await expect(results, `search results for "${query}"`).toBeVisible();
+  }
+
   @Then('the table of contents should link to {string}')
   async tocLinks(name: string) {
     const toc = this.page.getByRole('navigation', { name: 'Table of contents' });

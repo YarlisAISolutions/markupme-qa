@@ -19,12 +19,14 @@ envs:
 tags:
   suites: [smoke, regression, sanity]
   roles: [anonymous]
-  extra: [probes, render, validate, security, diagrams, playground, pages, studio, a11y, negative, dark]
+  extra: [probes, render, validate, security, diagrams, playground, pages, site, studio, a11y, negative, dark]
 
 routes:
   home: /
   playground: /__markupme/playground
   kitchen-sink: /kitchen-sink.md
+  site-home: /site/index.html
+  site-page: /site/kitchen-sink.html
 
 auth:
   strategy: none
