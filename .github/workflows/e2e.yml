@@ -1,0 +1,61 @@
+name: e2e
+
+# SDODS end-to-end suites against a fresh build of YarlisAISolutions/markupme (main, or the
+# ref given to a manual run). markupme's own CI runs the same suites on its pull requests.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: markupme ref to test
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: YarlisAISolutions/markupme
+          ref: ${{ inputs.ref || 'main' }}
+          path: app
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.4.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+      - name: build markupme
+        working-directory: app
+        run: bun install --frozen-lockfile && bun run build
+      - name: start markupme serve
+        working-directory: app
+        run: |
+          nohup node packages/cli/dist/bin.js serve examples --port 4321 --no-live-reload > serve.log 2>&1 &
+          for _ in $(seq 1 30); do curl -sf http://127.0.0.1:4321/api/health && exit 0; sleep 1; done
+          cat serve.log; exit 1
+      - run: bun install --frozen-lockfile && npx playwright install --with-deps chromium
+      - run: npx sdods lint -p markupme --strict
+      - name: api suite
+        run: npx sdods run -p markupme -e local -l api --workers 2 && node scripts/qa-gate.mjs --suite api --min-scenarios 15
+      - name: ui suite
+        run: npx sdods run -p markupme -e local -l ui -b chromium --workers 2 && node scripts/qa-gate.mjs --suite ui --min-scenarios 10
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: sdods-evidence
+          path: .sdods/runs
+          retention-days: 14

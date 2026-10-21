@@ -1,0 +1,58 @@
+# SDODS project: MarkupMe (YarlisAISolutions/markupme).
+# The app under test lives in a different repository; this workspace holds only
+# the scenarios, the environments they run against and the CI that runs them.
+slug: markupme
+name: MarkupMe
+description: >-
+  Markdown platform: the `markupme serve` preview server (JSON render API,
+  playground, rendered pages with diagrams) and the web studio.
+organization: yarlis
+workspace: default
+layers: [ui, api]
+browsers: [chromium]
+testIdAttribute: data-testid
+
+envs:
+  default: local
+  available: [local]
+
+tags:
+  suites: [smoke, regression, sanity]
+  roles: [anonymous]
+  extra: [probes, render, validate, security, diagrams, playground, pages, studio, a11y, negative, dark]
+
+routes:
+  home: /
+  playground: /__markupme/playground
+  kitchen-sink: /kitchen-sink.md
+
+auth:
+  strategy: none
+  storageState: false
+
+heal:
+  enabled: true
+  primaryTimeoutMs: 10000
+  probeTimeoutMs: 1500
+  minScore: 0.6
+
+timeouts: { test: 60000, expect: 10000, action: 10000, navigation: 30000, api: 20000 }
+
+retries:
+  ci: 1
+  local: 0
+
+processes:
+  - name: pr-check
+    title: Pull request check
+    trigger: pr
+    tags: '@smoke'
+    browsers: [chromium]
+    gates: { minPassRate: 100 }
+  - name: release-gate
+    title: Release gate
+    trigger: release
+    tags: '@smoke or @regression'
+    browsers: [chromium]
+    failOnFlaky: true
+    gates: { minPassRate: 100, maxFlaky: 0 }

@@ -1,0 +1,6 @@
+# `markupme serve examples --port 4321` from a checkout of YarlisAISolutions/markupme.
+name: local
+ui: { baseUrl: http://127.0.0.1:4321 }
+api: { baseUrl: http://127.0.0.1:4321, headers: { Accept: application/json }, auth: { type: none } }
+users: { poolSize: 1 }
+use: { locale: en-US, timezoneId: America/New_York, colorScheme: light }

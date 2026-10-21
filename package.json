@@ -1,0 +1,34 @@
+{
+  "name": "markupme-qa",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "SDODS end-to-end tests for MarkupMe (YarlisAISolutions/markupme): the preview server API, playground, rendered pages and studio.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "sdods": "sdods",
+    "lint": "sdods lint -p markupme --strict",
+    "test:api": "sdods run -p markupme -e local -l api",
+    "test:ui": "sdods run -p markupme -e local -l ui -b chromium -t @smoke",
+    "smoke": "sdods run -p markupme -e local -t @smoke",
+    "regression": "sdods run -p markupme -e local -t @regression",
+    "gate:api": "node scripts/qa-gate.mjs --suite api --min-scenarios 5",
+    "doctor": "sdods doctor"
+  },
+  "dependencies": {
+    "@sdods/cli": "0.16.0",
+    "@sdods/core": "0.16.0",
+    "@sdods/contracts": "0.16.0",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "playwright-bdd": "9.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2"
+  },
+  "trustedDependencies": ["@playwright/test", "playwright", "esbuild", "better-sqlite3", "argon2"],
+  "packageManager": "bun@1.4.0"
+}
