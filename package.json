@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "description": "SDODS end-to-end tests for MarkupMe (YarlisAISolutions/markupme): the preview server API, playground, rendered pages and studio.",
   "engines": {
-    "node": ">=22"
+    "node": ">=24.22.1"
   },
   "scripts": {
     "sdods": "sdods",
