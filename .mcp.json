@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sdods": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@sdods/cli",
+        "mcp"
+      ]
+    }
+  }
+}
