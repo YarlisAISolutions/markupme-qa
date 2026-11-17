@@ -12,8 +12,8 @@
     "lint": "sdods lint -p markupme --strict",
     "test:api": "sdods run -p markupme -e local -l api",
     "test:ui": "sdods run -p markupme -e local -l ui -b chromium -t @smoke",
-    "smoke": "sdods run -p markupme -e local -t @smoke",
-    "regression": "sdods run -p markupme -e local -t @regression",
+    "smoke": "sdods run -p markupme -e local -b chromium -t @smoke",
+    "regression": "sdods run -p markupme -e local -b chromium -t @regression",
     "gate:api": "node scripts/qa-gate.mjs --suite api --min-scenarios 5",
     "doctor": "sdods doctor"
   },
