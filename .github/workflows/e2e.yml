@@ -2,6 +2,12 @@ name: e2e
 
 # SDODS end-to-end suites against a fresh build of YarlisAISolutions/markupme (main, or the
 # ref given to a manual run). markupme's own CI runs the same suites on its pull requests.
+#
+# `smoke` is the cross-browser matrix from TGL-19: the `@smoke` UI scenarios on chromium,
+# firefox and webkit, one job per engine. This repository is public, so it cannot call the
+# private yarlis-smart-rollout `sdods-browsers.yml`; the matrix lives here instead and runs
+# against a locally started MarkupMe, because MarkupMe has no staging (MKP-15, decision A).
+# The checks are `smoke (chromium)`, `smoke (firefox)` and `smoke (webkit)`.
 
 on:
   pull_request:
@@ -27,29 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/markupme-serve
         with:
-          repository: YarlisAISolutions/markupme
           # Repository variable APP_REF pins a markupme branch (bootstrap, paired PRs).
           ref: ${{ inputs.ref || vars.APP_REF || 'main' }}
-          path: app
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
-        with:
-          bun-version: 1.4.0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          node-version: '24.22.1'
-      - name: build markupme
-        working-directory: app
-        run: bun install --frozen-lockfile && bun run build
-      - name: start markupme serve
-        working-directory: app
-        run: |
-          node packages/cli/dist/bin.js build examples -o examples/site
-          cp -R apps/studio/dist examples/studio
-          nohup node packages/cli/dist/bin.js serve examples --port 4321 --no-live-reload > serve.log 2>&1 &
-          for _ in $(seq 1 30); do curl -sf http://127.0.0.1:4321/api/health && exit 0; sleep 1; done
-          cat serve.log; exit 1
       - run: bun install --frozen-lockfile && npx playwright install --with-deps chromium
       - run: npx sdods lint -p markupme --strict
       - name: api suite
@@ -62,3 +49,30 @@ jobs:
           name: sdods-evidence
           path: .sdods/runs
           retention-days: 14
+
+  smoke:
+    name: smoke (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # A browser-specific break turns only its own engine red.
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    env:
+      BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/markupme-serve
+        with:
+          ref: ${{ inputs.ref || vars.APP_REF || 'main' }}
+      - run: bun install --frozen-lockfile && npx playwright install --with-deps "$BROWSER"
+      # qa-gate fails an empty or short run: `sdods run` exits 0 when no scenario matches.
+      - name: smoke suite
+        run: npx sdods run -p markupme -e local -t @smoke -l ui -b "$BROWSER" --workers 2 --retries 1 --no-notify && node scripts/qa-gate.mjs --suite "ui smoke ($BROWSER)" --min-scenarios 15
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: failure() || cancelled()
+        with:
+          name: sdods-smoke-${{ matrix.browser }}
+          path: .sdods/runs
+          retention-days: 3

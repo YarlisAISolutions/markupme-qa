@@ -9,7 +9,7 @@ description: >-
 organization: yarlis
 workspace: default
 layers: [ui, api]
-browsers: [chromium]
+browsers: [chromium, firefox, webkit]
 testIdAttribute: data-testid
 
 envs:

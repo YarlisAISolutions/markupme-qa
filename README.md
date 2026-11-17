@@ -32,6 +32,16 @@ node scripts/qa-gate.mjs --suite api --min-scenarios 15
 
 `sdods run` exits 0 when no scenario matches the selection, so CI always follows a run with `scripts/qa-gate.mjs`, which fails an empty or short run.
 
+### Cross-browser smoke
+
+CI also runs the `@smoke` UI scenarios on chromium, firefox and webkit, one job per engine (`smoke (chromium)`, `smoke (firefox)`, `smoke (webkit)`), against the same locally started MarkupMe. This is the TGL-19 matrix, kept in this repository because a public repository can't call the private `sdods-browsers.yml` (MKP-15). To run one engine locally:
+
+```bash
+npx playwright install firefox
+npx sdods run -p markupme -e local -t @smoke -l ui -b firefox --workers 2
+node scripts/qa-gate.mjs --suite "ui smoke (firefox)" --min-scenarios 15
+```
+
 ## Rules
 
 - Every scenario carries one layer tag (`@ui`, `@api`) and one suite tag (`@smoke`, `@regression`, `@sanity`).
