@@ -1,0 +1,38 @@
+name: markupme serve
+description: >-
+  Check out YarlisAISolutions/markupme into ./app, build it, and start
+  `markupme serve examples --port 4321` (with the built site and the studio) in
+  the background. Shared by the e2e and cross-browser smoke jobs.
+
+inputs:
+  ref:
+    description: markupme ref to build.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        repository: YarlisAISolutions/markupme
+        ref: ${{ inputs.ref }}
+        path: app
+    - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      with:
+        bun-version: 1.4.0
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+      with:
+        node-version: '24.22.1'
+    - name: build markupme
+      shell: bash
+      working-directory: app
+      run: bun install --frozen-lockfile && bun run build
+    - name: start markupme serve
+      shell: bash
+      working-directory: app
+      run: |
+        node packages/cli/dist/bin.js build examples -o examples/site
+        cp -R apps/studio/dist examples/studio
+        nohup node packages/cli/dist/bin.js serve examples --port 4321 --no-live-reload > serve.log 2>&1 &
+        for _ in $(seq 1 30); do curl -sf http://127.0.0.1:4321/api/health && exit 0; sleep 1; done
+        cat serve.log; exit 1
